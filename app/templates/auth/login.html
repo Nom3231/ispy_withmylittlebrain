@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="arcade-box arcade-box-cyan p-4 p-md-5">
+            <div class="text-center mb-4">
+                <span class="badge-arcade bg-black text-info border-info mb-2">OPERATOR AUTHENTICATION</span>
+                <h2 class="font-arcade text-white fs-3 mb-1">PLAYER LOGIN</h2>
+                <p class="text-dim small font-monospace">Enter your credentials to load player profile</p>
+            </div>
+
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-3">
+                    <label class="font-arcade small text-info mb-2" for="username">USERNAME:</label>
+                    {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), id="username", placeholder="INPUT USERNAME", autofocus=True) }}
+                    {% for error in form.username.errors %}
+                        <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="font-arcade small text-info mb-2" for="password">ACCESS CODE:</label>
+                    {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), id="password", placeholder="INPUT PASSWORD") }}
+                    {% for error in form.password.errors %}
+                        <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-grid mb-3">
+                    {{ form.submit(class="btn btn-arcade btn-arcade-cyan py-3") }}
+                </div>
+            </form>
+
+            <div class="text-center mt-3 pt-3 border-top border-secondary">
+                <span class="text-dim small font-monospace">NEW OPERATOR? </span>
+                <a href="{{ url_for('auth.register') }}" class="text-warning font-arcade small text-decoration-none">SIGN UP HERE</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

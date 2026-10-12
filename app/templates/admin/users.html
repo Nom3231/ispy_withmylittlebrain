@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{{ url_for('admin.dashboard') }}" class="text-info font-monospace small">< Back to Dashboard</a>
+                <h2 class="font-arcade text-white fs-3 mt-1 mb-0 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined">group</span> USER MANAGEMENT
+                </h2>
+            </div>
+        </div>
+
+        <div class="arcade-box p-4 border-secondary">
+            <div class="table-responsive">
+                <table class="table table-arcade table-borderless mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>USERNAME</th>
+                            <th>ROLE</th>
+                            <th>JOINED</th>
+                            <th class="text-end">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="font-monospace text-muted">#{{ user.id }}</td>
+                            <td class="font-monospace text-white fw-bold">{{ user.username }}</td>
+                            <td>
+                                {% if user.is_admin %}
+                                    <span class="badge-arcade bg-black text-danger border-danger">ADMIN</span>
+                                {% else %}
+                                    <span class="badge-arcade bg-black text-dim border-secondary">PLAYER</span>
+                                {% endif %}
+                            </td>
+                            <td class="font-monospace text-dim">{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td class="text-end">
+                                {% if user.id != current_user.id %}
+                                <div class="d-inline-flex gap-2">
+                                    <form method="POST" action="{{ url_for('admin.toggle_admin', user_id=user.id) }}" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-arcade btn-arcade-outline" style="font-size: 0.65rem;">
+                                            {{ 'REVOKE ADMIN' if user.is_admin else 'MAKE ADMIN' }}
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete user {{ user.username }}?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-arcade btn-arcade-pink" style="font-size: 0.65rem;">
+                                            DELETE
+                                        </button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <span class="badge bg-secondary font-monospace small">CURRENT USER</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

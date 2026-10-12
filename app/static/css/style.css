@@ -1,0 +1,453 @@
+/* ==========================================================
+   I SPY WITH MY LITTLE BRAIN - RETRO ARCADE THEME
+   Crisp, Balanced 8/16-bit UI with 10-Level Progression Map
+   ========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --bg-dark: #0b0f19;
+  --panel-bg: #131a29;
+  --panel-border: #24324d;
+  
+  --arcade-cyan: #00f0ff;
+  --arcade-green: #39ff14;
+  --arcade-amber: #ffb703;
+  --arcade-pink: #ff007f;
+  --arcade-red: #ff3344;
+  --arcade-purple: #a855f7;
+  
+  --text-main: #f0f6fc;
+  --text-dim: #8b949e;
+  
+  --pixel-shadow: none;
+  --pixel-shadow-sm: 2px 2px 0px #000000;
+}
+
+body {
+  background-color: var(--bg-dark);
+  background-image: 
+    linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--text-main);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================
+   HIDE NUMBER INPUT SPINNER / SCROLLBAR
+   ========================================================== */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+input[type=number] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+/* Balanced Pixel Fonts */
+.font-arcade {
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: 0.5px;
+  line-height: 1.7;
+}
+
+h1.font-arcade,
+h2.font-arcade,
+h3.font-arcade {
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+label.font-arcade {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+}
+
+/* Arcade Panels & Boxes */
+.arcade-box {
+  background: var(--panel-bg);
+  border: 2px solid var(--panel-border);
+  box-shadow: none;
+  position: relative;
+}
+
+.arcade-box-cyan {
+  border-color: var(--arcade-cyan);
+}
+
+.arcade-box-green {
+  border-color: var(--arcade-green);
+}
+
+.arcade-box-amber {
+  border-color: var(--arcade-amber);
+}
+
+.arcade-box-pink {
+  border-color: var(--arcade-pink);
+}
+
+/* Header & Marquee */
+.navbar {
+  background: #070a10 !important;
+  border-bottom: 2px solid var(--arcade-cyan);
+}
+
+.navbar-brand {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.8rem;
+  color: var(--arcade-cyan) !important;
+}
+
+.nav-link {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  color: var(--text-dim) !important;
+  font-size: 0.78rem;
+  padding: 0.4rem 0.6rem !important;
+  border: 1px solid transparent;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #fff !important;
+  border-color: var(--arcade-cyan);
+  background: rgba(0, 240, 255, 0.1);
+}
+
+.navbar-toggler {
+  border: 2px solid var(--arcade-cyan);
+  border-radius: 0;
+  color: var(--arcade-cyan);
+  padding: 0.15rem 0.35rem;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--panel-border);
+  }
+
+  .navbar-nav {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .nav-link {
+    padding: 0.65rem 0.4rem !important;
+  }
+}
+
+/* ==========================================================
+   RETRO BUTTONS WITH HIGH-CONTRAST HOVER VISIBILITY
+   ========================================================== */
+.btn-arcade {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.68rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0px;
+  border: 2px solid #000;
+  text-transform: uppercase;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-arcade:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0px #000;
+}
+
+.btn-arcade:active {
+  transform: translate(1px, 1px);
+  box-shadow: none !important;
+}
+
+/* Green Button (Always Black Text, Bright Glow on Hover) */
+.btn-arcade-green {
+  background: var(--arcade-green) !important;
+  color: #000000 !important;
+}
+.btn-arcade-green:hover, .btn-arcade-green:focus {
+  background: #52ff33 !important;
+  color: #000000 !important;
+}
+
+/* Cyan Button (Always Black Text) */
+.btn-arcade-cyan {
+  background: var(--arcade-cyan) !important;
+  color: #000000 !important;
+}
+.btn-arcade-cyan:hover, .btn-arcade-cyan:focus {
+  background: #38e1ff !important;
+  color: #000000 !important;
+}
+
+/* Pink Button (Always White Text) */
+.btn-arcade-pink {
+  background: var(--arcade-pink) !important;
+  color: #ffffff !important;
+}
+.btn-arcade-pink:hover, .btn-arcade-pink:focus {
+  background: #ff2a94 !important;
+  color: #ffffff !important;
+}
+
+/* Amber Button (Always Black Text) */
+.btn-arcade-amber {
+  background: var(--arcade-amber) !important;
+  color: #000000 !important;
+}
+.btn-arcade-amber:hover, .btn-arcade-amber:focus {
+  background: #ffc933 !important;
+  color: #000000 !important;
+}
+
+/* Outline Button */
+.btn-arcade-outline {
+  background: transparent !important;
+  color: var(--text-main) !important;
+  border: 2px solid var(--panel-border) !important;
+}
+.btn-arcade-outline:hover, .btn-arcade-outline:focus {
+  background: rgba(0, 240, 255, 0.15) !important;
+  border-color: var(--arcade-cyan) !important;
+  color: var(--arcade-cyan) !important;
+}
+
+/* Input Fields */
+.form-control, .form-select {
+  background-color: #080c14 !important;
+  border: 2px solid var(--panel-border) !important;
+  border-radius: 0px !important;
+  color: #39ff14 !important;
+  font-family: 'Space Mono', monospace;
+  font-size: 1.1rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--arcade-cyan) !important;
+  box-shadow: inset 2px 2px 0px #000, 0 0 10px rgba(0, 240, 255, 0.3) !important;
+}
+
+/* ==========================================================
+   10-LEVEL STAGE PROGRESSION MAP (GAMIFIED UI)
+   ========================================================== */
+.stage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+  gap: 0.5rem;
+}
+
+.stage-node {
+  background: #080c14;
+  border: 2px solid var(--panel-border);
+  padding: 0.6rem 0.3rem;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text-dim);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.stage-node.unlocked {
+  border-color: #243b55;
+  color: var(--text-main);
+}
+.stage-node.unlocked:hover {
+  border-color: var(--arcade-cyan);
+  background: #0e1726;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.stage-node.active-stage {
+  border-color: var(--arcade-green) !important;
+  background: rgba(57, 255, 20, 0.1) !important;
+  color: #fff !important;
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+}
+
+.stage-node.locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+button.stage-node {
+  width: 100%;
+  cursor: pointer;
+  font: inherit;
+  appearance: none;
+}
+
+.stage-node .stage-label {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.stage-node.stage-held {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+form.stage-form {
+  display: contents;
+}
+
+.level-filter {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 0.25rem;
+}
+
+.level-chip {
+  flex: 0 0 auto;
+  min-width: 2.6rem;
+  padding: 0.4rem 0.65rem;
+  border: 2px solid var(--panel-border);
+  color: var(--text-dim);
+  background: #080c14;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.level-chip.active {
+  border-color: var(--arcade-cyan);
+  color: #fff;
+  background: rgba(0, 240, 255, 0.12);
+}
+
+.rank-icon {
+  font-size: 1.1rem;
+  vertical-align: middle;
+}
+
+.rank-1 { color: #ffd700; }
+.rank-2 { color: #d5d8de; }
+.rank-3 { color: #cd7f32; }
+
+.xp-bar-container {
+  background: #080c14;
+  border: 2px solid var(--panel-border);
+  padding: 0.75rem 1rem;
+}
+
+/* Retro Badges */
+.badge-arcade {
+  display: inline-block;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  line-height: 1.8;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0px;
+  border: 1px solid #000;
+}
+
+.badge-arcade:has(+ h1),
+.badge-arcade:has(+ h2) {
+  margin-bottom: 1.35rem;
+}
+
+/* CRT Screen Box */
+.hud-screen {
+  background: #060911;
+  border: 2px solid #1f293d;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+  padding: 1rem;
+}
+
+/* Animations */
+.animate-shake {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-2px, 0, 0); }
+  20%, 80% { transform: translate3d(3px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.animate-win {
+  animation: winBounce 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes winBounce {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-5px); }
+}
+
+.fade-out {
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out, max-height 0.5s ease-out;
+  opacity: 0 !important;
+  transform: translateY(-8px) !important;
+  max-height: 0px !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Guess Row */
+.guess-row {
+  background: #0d131f;
+  border-left: 3px solid var(--arcade-cyan);
+  border-bottom: 1px solid #1a2336;
+  padding: 0.6rem 0.9rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+}
+
+/* Tables */
+.table-arcade {
+  color: var(--text-main);
+  border: 2px solid var(--panel-border);
+}
+.table-arcade th {
+  background: #090e18;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.62rem;
+  color: var(--arcade-cyan);
+  border-bottom: 2px solid var(--panel-border);
+  padding: 0.7rem;
+}
+.table-arcade td {
+  background: #0e1422;
+  border-bottom: 1px solid #1a2336;
+  padding: 0.7rem;
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+.table-arcade tr:hover td {
+  background: #141d30;
+}
+
+footer {
+  background: #070a10;
+  border-top: 2px solid var(--panel-border);
+  font-size: 0.8rem;
+}

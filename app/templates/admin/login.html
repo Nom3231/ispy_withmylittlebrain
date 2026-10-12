@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="arcade-box arcade-box-pink p-4 p-md-5">
+            <div class="text-center mb-4">
+                <h2 class="font-arcade text-white fs-3 mb-1">SIGN IN</h2>
+            </div>
+
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="font-arcade small text-danger mb-2" for="username">USERNAME:</label>
+                    {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), id="username", placeholder="USERNAME", autofocus=True) }}
+                    {% for error in form.username.errors %}
+                        <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="font-arcade small text-danger mb-2" for="password">PASSWORD:</label>
+                    {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), id="password", placeholder="PASSWORD") }}
+                    {% for error in form.password.errors %}
+                        <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-grid mb-3">
+                    {{ form.submit(class="btn btn-arcade btn-arcade-pink py-3") }}
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

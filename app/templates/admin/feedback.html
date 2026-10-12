@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{{ url_for('admin.dashboard') }}" class="text-info font-monospace small">< Back to Dashboard</a>
+                <h2 class="font-arcade text-white fs-3 mt-1 mb-0 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined">forum</span> PLAYER FEEDBACK LOG
+                </h2>
+            </div>
+        </div>
+
+        <div class="arcade-box p-4 border-secondary">
+            {% if feedbacks %}
+            <div class="table-responsive">
+                <table class="table table-arcade table-borderless mb-0">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>SENDER</th>
+                            <th>EMAIL</th>
+                            <th>RATING</th>
+                            <th>MESSAGE</th>
+                            <th class="text-end">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in feedbacks %}
+                        <tr>
+                            <td class="font-monospace text-dim small">{{ f.submitted_at.strftime('%Y-%m-%d') }}</td>
+                            <td class="font-monospace text-white fw-bold">{{ f.name }}</td>
+                            <td class="font-monospace text-info small">{{ f.email }}</td>
+                            <td>
+                                <span class="badge-arcade bg-black text-warning border-warning d-inline-flex align-items-center gap-1">
+                                    {{ f.rating }} <span class="material-symbols-outlined fs-6">star</span>
+                                </span>
+                            </td>
+                            <td class="font-monospace text-dim small" style="max-width: 320px;">
+                                {{ f.message }}
+                            </td>
+                            <td class="text-end">
+                                <form method="POST" action="{{ url_for('admin.delete_feedback', feedback_id=f.id) }}" class="d-inline" onsubmit="return confirm('Delete this feedback?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-arcade btn-arcade-pink" style="font-size: 0.65rem;">
+                                        DELETE
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <p class="font-arcade text-dim small mb-0">NO FEEDBACK SUBMISSIONS IN DATABASE.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

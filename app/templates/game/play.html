@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        
+        <!-- 10-Level Stage Progression HUD & XP Bar -->
+        <div class="arcade-box p-3 mb-3 border-secondary">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge-arcade bg-black text-warning border-warning">
+                        RANK: LVL {{ progression.current_level }}
+                    </span>
+                    <span class="font-arcade text-white small">{{ progression.level_name }}</span>
+                    {% if game.round > 1 %}
+                    <span class="badge-arcade bg-black text-info border-info animate-pulse d-inline-flex align-items-center gap-1">
+                        <span class="material-symbols-outlined fs-6">local_fire_department</span>
+                        STREAK: ROUND {{ game.round }}
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="font-monospace text-dim small">
+                    TOTAL SCORE: <strong class="text-success">{{ "{:,}".format(progression.total_points) }} PTS</strong>
+                </div>
+            </div>
+
+            <!-- XP Progress to Next Level -->
+            {% if progression.next_threshold %}
+            <div class="mb-3 p-2 bg-black border border-secondary">
+                <div class="d-flex justify-content-between font-monospace small text-dim mb-1">
+                    <span>NEXT UNLOCK: <strong class="text-warning">LEVEL {{ progression.current_level + 1 }}</strong></span>
+                    <span>{{ progression.progress_pct }}% ({{ "{:,}".format(progression.points_needed) }} PTS TO UNLOCK)</span>
+                </div>
+                <div class="progress" style="height: 8px; background: #131a29; border-radius: 0;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ progression.progress_pct }}%;"></div>
+                </div>
+            </div>
+            {% else %}
+            <div class="mb-3 p-2 bg-black border border-warning text-center">
+                <span class="font-arcade text-warning small d-inline-flex align-items-center gap-1">
+                    <span class="material-symbols-outlined fs-6">star</span>
+                    MAXIMUM RANK: CYBER MASTERMIND
+                    <span class="material-symbols-outlined fs-6">star</span>
+                </span>
+            </div>
+            {% endif %}
+
+            <!-- Interactive 10-Stage Grid Map -->
+            <div class="stage-grid">
+                {% for lvl_num, lvl_cfg in levels_config.items() %}
+                    {% if lvl_num in progression.unlocked_levels and game.status != 'lost' %}
+                        <form method="POST" action="{{ url_for('game.restart', level=lvl_num) }}" class="stage-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit"
+                                    class="stage-node unlocked {{ 'active-stage' if game.level == lvl_num else '' }}"
+                                    title="{{ lvl_cfg.name }} (Base Range: 0 - {{ "{:,}".format(lvl_cfg.base_max) }}) | Base Mult: {{ lvl_cfg.base_multiplier }}x">
+                                <span class="stage-label">L{{ lvl_num }}</span>
+                                <span class="material-symbols-outlined fs-6" style="color: {{ lvl_cfg.color }};">
+                                    {% if lvl_num <= 3 %}sports_esports
+                                    {% elif lvl_num <= 6 %}bolt
+                                    {% elif lvl_num <= 9 %}local_fire_department
+                                    {% else %}crown
+                                    {% endif %}
+                                </span>
+                                <small class="font-monospace text-muted" style="font-size: 0.75rem;">{{ lvl_cfg.base_multiplier }}x</small>
+                            </button>
+                        </form>
+                    {% elif lvl_num in progression.unlocked_levels %}
+                        <div class="stage-node unlocked stage-held" title="Restart from Level 1 before choosing a rank.">
+                            <span class="stage-label">L{{ lvl_num }}</span>
+                            <span class="material-symbols-outlined fs-6" style="color: {{ lvl_cfg.color }};">
+                                {% if lvl_num <= 3 %}sports_esports
+                                {% elif lvl_num <= 6 %}bolt
+                                {% elif lvl_num <= 9 %}local_fire_department
+                                {% else %}crown
+                                {% endif %}
+                            </span>
+                            <small class="font-monospace text-muted" style="font-size: 0.7rem;">HELD</small>
+                        </div>
+                    {% else %}
+                        <div class="stage-node locked" title="Requires {{ "{:,}".format(lvl_cfg.points_required) }} total points">
+                            <span class="stage-label">L{{ lvl_num }}</span>
+                            <span class="material-symbols-outlined fs-6 text-muted">lock</span>
+                            <small class="font-monospace text-muted" style="font-size: 0.7rem;">{{ lvl_cfg.points_required // 1000 }}K</small>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Main Game Arena -->
+        <div class="arcade-box arcade-box-cyan p-4 p-md-4 mb-4 text-center {{ 'animate-shake' if game.guesses and game.status == 'in_progress' else '' }}">
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="badge-arcade bg-black" style="color: {{ game.color }}; border-color: {{ game.color }};">
+                        LEVEL {{ game.level }}: {{ game.level_name|upper }}
+                    </span>
+                    <span class="badge-arcade bg-black text-info border-info">
+                        BASE MULTIPLIER: {{ game.base_multiplier }}x
+                    </span>
+                </div>
+                <p class="text-dim small mb-0 mt-2 font-monospace">
+                    TARGET IS CONCEALED BETWEEN 
+                    <span class="text-warning fw-bold">[ {{ game.min }} ]</span> AND 
+                    <span class="text-warning fw-bold">[ {{ "{:,}".format(game.max) }} ]</span>
+                    {% if game.round > 1 %}
+                    <span class="text-info small">(Round {{ game.round }}: +{{ (game.round - 1) * 25 }}% Range Extended)</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Attempts Meter -->
+            <div class="hud-screen mb-3 text-start">
+                <div class="d-flex justify-content-between font-arcade small mb-2">
+                    <span class="text-info" style="font-size: 0.65rem;">TRIES USED: {{ game.attempts_used }} / {{ game.max_attempts }}</span>
+                    <span class="{{ 'text-danger fw-bold' if (game.max_attempts - game.attempts_used) <= 3 else 'text-success' }}" style="font-size: 0.65rem;">
+                        REMAINING: {{ game.max_attempts - game.attempts_used }}
+                    </span>
+                </div>
+                <div class="progress" style="height: 10px; background: #000; border: 1px solid #24324d; border-radius: 0;">
+                    {% set pct = (game.attempts_used / game.max_attempts) * 100 %}
+                    <div class="progress-bar {{ 'bg-danger' if pct >= 80 else ('bg-warning' if pct >= 50 else 'bg-info') }}" 
+                         role="progressbar" 
+                         style="width: {{ pct }}%"></div>
+                </div>
+            </div>
+
+            <!-- Active Play vs End States -->
+            {% if game.status == 'in_progress' %}
+                <form method="POST" class="mb-3" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="row g-2 justify-content-center">
+                        <div class="col-md-7">
+                            {{ form.guess(class="form-control text-center font-arcade fs-4 py-2", placeholder="ENTER GUESS", min=game.min, max=game.max, autofocus=True, autocomplete="off", type="number") }}
+                        </div>
+                        <div class="col-md-5 d-grid">
+                            {{ form.submit(class="btn btn-arcade btn-arcade-cyan py-2") }}
+                        </div>
+                    </div>
+                    {% for error in form.guess.errors %}
+                        <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </form>
+            {% elif game.status == 'won' %}
+                <div class="arcade-box arcade-box-green p-3 mb-3 bg-black text-center animate-win">
+                    <div class="font-arcade text-success fs-5 mb-1 d-flex align-items-center justify-content-center gap-2">
+                        <span class="material-symbols-outlined text-warning">emoji_events</span> STAGE CLEARED!
+                    </div>
+                    <p class="font-monospace text-white small mb-1">
+                        Decrypted in <strong>{{ game.attempts_used }}</strong> tries with <strong>{{ game.effective_mult }}x</strong> multiplier!
+                    </p>
+                    <div class="font-arcade text-warning fs-5 mb-3">+{{ "{:,}".format(game.score) }} PTS</div>
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <form method="POST" action="{{ url_for('game.restart', level=game.level) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-arcade btn-arcade-green px-3 py-2">
+                                <span class="material-symbols-outlined fs-6 me-1">replay</span> PLAY AGAIN (ROUND {{ game.round + 1 }})
+                            </button>
+                        </form>
+                        {% if (game.level + 1) in progression.unlocked_levels %}
+                        <form method="POST" action="{{ url_for('game.restart', level=game.level + 1) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-arcade btn-arcade-cyan px-3 py-2">
+                                <span class="material-symbols-outlined fs-6 me-1">fast_forward</span> ADVANCE TO LVL {{ game.level + 1 }}
+                            </button>
+                        </form>
+                        {% endif %}
+                        <a href="{{ url_for('game.leaderboard') }}" class="btn btn-arcade btn-arcade-outline px-3 py-2">
+                            <span class="material-symbols-outlined fs-6 me-1">leaderboard</span> SCORES
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="arcade-box arcade-box-pink p-3 mb-3 bg-black text-center animate-shake">
+                    <div class="font-arcade text-danger fs-5 mb-1 d-flex align-items-center justify-content-center gap-2">
+                        <span class="material-symbols-outlined">dangerous</span> RUN TERMINATED
+                    </div>
+                    <p class="font-monospace text-dim small mb-1">
+                        10 attempts failed on Level {{ game.level }}. The secret was: <span class="text-warning fw-bold">[ {{ game.target }} ]</span>
+                    </p>
+                    <p class="font-monospace text-danger small mb-3 d-flex align-items-center justify-content-center gap-1">
+                        <span class="material-symbols-outlined fs-6">warning</span>
+                        Next round starts at Level 1.
+                    </p>
+                    <form method="POST" action="{{ url_for('game.restart', level=1) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-arcade btn-arcade-pink px-4 py-2">
+                            <span class="material-symbols-outlined fs-6 me-1">restart_alt</span> RESTART FROM LEVEL 1
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+
+            {% if game.guesses %}
+            <div class="text-start mt-3 pt-2 border-top border-secondary" id="hint-section">
+                <div class="font-monospace text-info small mb-2 d-flex align-items-center gap-1">
+                    <span class="material-symbols-outlined fs-6">terminal</span> HINT LOG
+                </div>
+                <div class="d-flex flex-column gap-1" id="hint-log-container">
+                    {% for item in game.guesses|reverse %}
+                    <div class="guess-row d-flex justify-content-between align-items-center py-2">
+                        <div>
+                            <span class="text-warning fw-bold me-2 font-monospace">TRY #{{ loop.revindex }}: [ {{ item.guess }} ]</span>
+                            <span class="text-white font-monospace">{{ item.hint }}</span>
+                        </div>
+                        <span class="badge-arcade bg-black text-{{ item.badge }} border-{{ item.badge }}">
+                            {{ item.badge|upper }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

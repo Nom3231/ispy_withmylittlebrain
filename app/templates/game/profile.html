@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Player Header Card -->
+        <div class="arcade-box arcade-box-cyan p-4 mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <span class="badge-arcade bg-black text-info border-info mb-2 d-inline-flex align-items-center gap-1">
+                        <span class="material-symbols-outlined fs-6">badge</span> PLAYER IDENTITY CARD
+                    </span>
+                    <h2 class="font-arcade text-white fs-3 mb-1">{{ current_user.username }}</h2>
+                    <p class="text-dim small font-monospace mb-0">Joined: {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div class="col-md-6">
+                    <div class="row g-2 text-center">
+                        <div class="col-4">
+                            <div class="p-2 border border-secondary bg-black">
+                                <div class="font-arcade text-info fs-5">{{ stats.total_games }}</div>
+                                <div class="text-muted small">ROUNDS</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border border-secondary bg-black">
+                                <div class="font-arcade text-success fs-5">{{ stats.total_wins }}</div>
+                                <div class="text-muted small">WINS</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border border-secondary bg-black">
+                                <div class="font-arcade text-warning fs-5">{{ stats.win_rate }}%</div>
+                                <div class="text-muted small">WIN RATE</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-4">
+            {% for lvl_num, lvl in levels_config.items() %}
+            <div class="col-6 col-md-4 col-xl-3">
+                <div class="arcade-box p-3 h-100 text-center" style="border-color: {{ lvl.color }};">
+                    <div class="d-flex align-items-center justify-content-center gap-1 mb-2">
+                        <span class="material-symbols-outlined fs-6" style="color: {{ lvl.color }};">
+                            {% if lvl_num <= 3 %}sports_esports
+                            {% elif lvl_num <= 6 %}bolt
+                            {% elif lvl_num <= 9 %}local_fire_department
+                            {% else %}crown
+                            {% endif %}
+                        </span>
+                        <span class="font-monospace fw-bold" style="color: {{ lvl.color }};">L{{ lvl_num }}</span>
+                    </div>
+                    <div class="font-monospace text-white small mb-1">{{ lvl.name }}</div>
+                    <div class="font-arcade text-white" style="font-size: 0.75rem;">{{ "{:,}".format(stats.best_by_level[lvl_num|string]) }} PTS</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Game History Log -->
+        <div class="arcade-box p-4 border-secondary">
+            <h4 class="font-arcade text-warning fs-5 mb-3 d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined text-warning">history</span> RECENT MISSION LOG
+            </h4>
+            {% if history %}
+            <div class="table-responsive">
+                <table class="table table-arcade table-borderless mb-0">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>LEVEL</th>
+                            <th>TARGET</th>
+                            <th>TRIES</th>
+                            <th>OUTCOME</th>
+                            <th class="text-end">SCORE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game in history %}
+                        <tr>
+                            <td class="font-monospace text-dim">{{ game.played_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                {% set lvl_int = game.difficulty|int %}
+                                {% if lvl_int in levels_config %}
+                                    <span class="badge-arcade bg-black" style="color: {{ levels_config[lvl_int].color }}; border-color: {{ levels_config[lvl_int].color }};">
+                                        L{{ lvl_int }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge-arcade bg-black text-dim border-secondary">{{ game.difficulty }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="font-monospace text-warning">[ {{ game.target_number }} ]</td>
+                            <td class="font-monospace text-white">{{ game.attempts_used }} / {{ game.max_attempts }}</td>
+                            <td>
+                                {% if game.won %}
+                                    <span class="text-success font-arcade small d-inline-flex align-items-center gap-1">
+                                        <span class="material-symbols-outlined fs-6">check</span> WIN
+                                    </span>
+                                {% else %}
+                                    <span class="text-danger font-arcade small d-inline-flex align-items-center gap-1">
+                                        <span class="material-symbols-outlined fs-6">close</span> LOSS
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end font-arcade {{ 'text-success' if game.won else 'text-dim' }}">
+                                {{ game.score }} PTS
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <p class="font-arcade text-dim small mb-2">NO MISSIONS LOGGED YET.</p>
+                <a href="{{ url_for('game.play') }}" class="btn btn-arcade btn-arcade-cyan btn-sm d-inline-flex align-items-center gap-1">
+                    <span class="material-symbols-outlined fs-6">play_arrow</span> START MISSION
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

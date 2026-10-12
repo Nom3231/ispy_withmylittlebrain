@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="arcade-box arcade-box-cyan p-4 p-md-5">
+            <div class="text-center mb-4">
+                <span class="badge-arcade bg-black text-info border-info mb-2">COMMUNICATIONS RELAY</span>
+                <h2 class="font-arcade text-white fs-3 mb-1">CONTACT US</h2>
+                <p class="text-dim small font-monospace">Get in touch with the development organization</p>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="p-3 bg-black border border-secondary h-100">
+                        <div class="font-arcade text-warning small mb-2 d-flex align-items-center gap-1"><span class="material-symbols-outlined fs-6">apartment</span> ORGANIZATION</div>
+                        <p class="text-white font-monospace mb-0">{{ org_info.name }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-black border border-secondary h-100">
+                        <div class="font-arcade text-success small mb-2 d-flex align-items-center gap-1"><span class="material-symbols-outlined fs-6">mail</span> EMAIL</div>
+                        <a href="mailto:{{ org_info.email }}" class="text-info font-monospace text-decoration-none">{{ org_info.email }}</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-black border border-secondary h-100">
+                        <div class="font-arcade text-info small mb-2 d-flex align-items-center gap-1"><span class="material-symbols-outlined fs-6">call</span> PHONE</div>
+                        <p class="text-white font-monospace mb-0">{{ org_info.phone }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-black border border-secondary h-100">
+                        <div class="font-arcade text-danger small mb-2 d-flex align-items-center gap-1"><span class="material-symbols-outlined fs-6">location_on</span> ADDRESS</div>
+                        <p class="text-white font-monospace mb-0">{{ org_info.address }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hud-screen text-center">
+                <p class="text-dim small font-monospace mb-3">Looking to share your thoughts or report an issue?</p>
+                <a href="{{ url_for('main.feedback') }}" class="btn btn-arcade btn-arcade-cyan">
+                    <span class="material-symbols-outlined fs-6 me-1">rate_review</span> SUBMIT FEEDBACK
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

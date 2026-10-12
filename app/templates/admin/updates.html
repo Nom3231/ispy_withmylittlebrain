@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a href="{{ url_for('admin.dashboard') }}" class="text-info font-monospace small">< Back to Dashboard</a>
+                <h2 class="font-arcade text-white fs-3 mt-1 mb-0 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined">campaign</span> SYSTEM ANNOUNCEMENTS
+                </h2>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Publish Form -->
+            <div class="col-lg-5">
+                <div class="arcade-box arcade-box-cyan p-4">
+                    <h5 class="font-arcade text-info fs-6 mb-3">+ NEW ANNOUNCEMENT</h5>
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label class="font-arcade small text-white mb-2" for="title">TITLE:</label>
+                            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), id="title", placeholder="e.g. Version 2.0 Released!") }}
+                            {% for error in form.title.errors %}
+                                <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="font-arcade small text-white mb-2" for="content">BODY CONTENT:</label>
+                            {{ form.content(class="form-control" + (" is-invalid" if form.content.errors else ""), id="content", rows=5, placeholder="Enter announcement text...") }}
+                            {% for error in form.content.errors %}
+                                <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-arcade btn-arcade-cyan") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Existing Updates -->
+            <div class="col-lg-7">
+                <div class="arcade-box p-4 border-secondary">
+                    <h5 class="font-arcade text-warning fs-6 mb-3">PUBLISHED BROADCASTS</h5>
+                    {% if updates %}
+                    <div class="d-flex flex-column gap-3">
+                        {% for update in updates %}
+                        <div class="p-3 bg-black border border-secondary">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="font-arcade text-info fs-6 mb-0">{{ update.title }}</h6>
+                                <form method="POST" action="{{ url_for('admin.delete_update', update_id=update.id) }}" class="d-inline" onsubmit="return confirm('Delete announcement?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-arcade btn-arcade-pink" style="font-size: 0.6rem; padding: 0.3rem 0.5rem;">
+                                        DELETE
+                                    </button>
+                                </form>
+                            </div>
+                            <p class="font-monospace text-dim small mb-2">{{ update.content }}</p>
+                            <small class="text-muted font-monospace">Posted: {{ update.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="font-arcade text-dim small mb-0">NO ANNOUNCEMENTS PUBLISHED YET.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

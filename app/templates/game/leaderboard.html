@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+            <div>
+                <h2 class="font-arcade text-warning fs-5 mb-1 d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined fs-4 text-warning">trophy</span> HALL OF FAME / HIGH SCORES
+                </h2>
+                <p class="text-dim small mb-0 font-monospace">Top deduction scores recorded across 10 progressive tiers.</p>
+            </div>
+
+            <!-- Level Selector Filter Dropdown / Pills -->
+            <div class="level-filter">
+                <a href="{{ url_for('game.leaderboard', level='all') }}" class="level-chip {{ 'active' if selected_level == 'all' else '' }}">ALL</a>
+                {% for l_num in range(1, 11) %}
+                <a href="{{ url_for('game.leaderboard', level=l_num) }}" class="level-chip {{ 'active' if selected_level == (l_num|string) else '' }}">L{{ l_num }}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="arcade-box arcade-box-cyan p-3 mb-4">
+            {% if top_scores %}
+            <div class="table-responsive">
+                <table class="table table-arcade table-borderless mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">RANK</th>
+                            <th style="width: 30%;">PLAYER</th>
+                            <th style="width: 25%;">STAGE</th>
+                            <th style="width: 15%;">TRIES</th>
+                            <th style="width: 20%;" class="text-end">SCORE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in top_scores %}
+                        <tr>
+                            <td class="font-monospace text-white">
+                                {% if loop.index == 1 %}
+                                    <span class="material-symbols-outlined rank-icon rank-1">emoji_events</span> 1
+                                {% elif loop.index == 2 %}
+                                    <span class="material-symbols-outlined rank-icon rank-2">emoji_events</span> 2
+                                {% elif loop.index == 3 %}
+                                    <span class="material-symbols-outlined rank-icon rank-3">emoji_events</span> 3
+                                {% else %}
+                                    {{ loop.index }}
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold text-white font-monospace">
+                                <span class="material-symbols-outlined fs-6 text-info">chevron_right</span> {{ record.player.username }}
+                            </td>
+                            <td>
+                                {% set lvl_int = record.difficulty|int %}
+                                {% if lvl_int in levels_config %}
+                                    <span class="badge-arcade bg-black" style="color: {{ levels_config[lvl_int].color }}; border-color: {{ levels_config[lvl_int].color }}; font-size: 0.55rem;">
+                                        L{{ lvl_int }}: {{ levels_config[lvl_int].name }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge-arcade bg-black text-dim border-secondary" style="font-size: 0.55rem;">
+                                        LEVEL {{ record.difficulty }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="font-monospace text-dim">
+                                {{ record.attempts_used }} / {{ record.max_attempts }}
+                            </td>
+                            <td class="text-end font-arcade text-success" style="font-size: 0.75rem;">
+                                {{ "{:,}".format(record.score) }} PTS
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <p class="font-arcade text-dim small mb-2">NO HIGH SCORES RECORDED FOR THIS FILTER YET.</p>
+                <a href="{{ url_for('game.play') }}" class="btn btn-arcade btn-arcade-cyan btn-sm">
+                    <span class="material-symbols-outlined fs-6 me-1">play_arrow</span> BE THE FIRST TO PLAY
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="arcade-box arcade-box-cyan p-4 p-md-5">
+            <div class="text-center mb-4">
+                <span class="badge-arcade bg-black text-warning border-warning mb-2">NEW OPERATOR ENTRY</span>
+                <h2 class="font-arcade text-white fs-3 mb-1">REGISTER</h2>
+                <p class="text-dim small font-monospace">Create your player tag to start competing</p>
+            </div>
+
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-3">
+                    <label class="font-arcade small text-info mb-2" for="username">PLAYER TAG / USERNAME:</label>
+                    {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), id="username", placeholder="CHOOSE TAG (3-30 CHARS)", autofocus=True) }}
+                    {% for error in form.username.errors %}
+                        <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="font-arcade small text-info mb-2" for="password">ACCESS CODE / PASSWORD:</label>
+                    {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), id="password", placeholder="MIN 6 CHARACTERS") }}
+                    {% for error in form.password.errors %}
+                        <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="font-arcade small text-info mb-2" for="confirm_password">CONFIRM ACCESS CODE:</label>
+                    {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), id="confirm_password", placeholder="REPEAT PASSWORD") }}
+                    {% for error in form.confirm_password.errors %}
+                        <div class="text-danger font-monospace small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-grid mb-3">
+                    {{ form.submit(class="btn btn-arcade btn-arcade-cyan py-3") }}
+                </div>
+            </form>
+
+            <div class="text-center mt-3 pt-3 border-top border-secondary">
+                <span class="text-dim small font-monospace">ALREADY REGISTERED? </span>
+                <a href="{{ url_for('auth.login') }}" class="text-warning font-arcade small text-decoration-none">LOG IN HERE</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
