@@ -1,10 +1,11 @@
 from urllib.parse import urljoin, urlparse
 
 from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from app.models import db, User
 from app.forms import RegistrationForm, LoginForm
+from app.tokens import clear_access_cookie, issue_access_token, set_access_cookie
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -47,12 +48,13 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
-            login_user(user)
             flash(f'Welcome back, {user.username}!', 'success')
             next_page = request.args.get('next')
             if is_safe_redirect(next_page):
-                return redirect(next_page)
-            return redirect(url_for('game.play'))
+                response = redirect(next_page)
+            else:
+                response = redirect(url_for('game.play'))
+            return set_access_cookie(response, issue_access_token(user))
         else:
             flash('Invalid username or password. Please try again.', 'danger')
             
@@ -61,6 +63,5 @@ def login():
 @auth_bp.route('/logout')
 @login_required
 def logout():
-    logout_user()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('main.index'))
+    return clear_access_cookie(redirect(url_for('main.index')))

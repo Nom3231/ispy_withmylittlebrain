@@ -1,9 +1,10 @@
 from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
-from flask_login import current_user, login_user
+from flask_login import current_user
 from app.models import db, User, GameScore, Feedback, ContentUpdate, ActiveGame
 from app.forms import ContentUpdateForm, AdminLoginForm
 from app.routes.auth import is_safe_redirect
+from app.tokens import issue_access_token, set_access_cookie
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -41,11 +42,12 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.is_admin and user.check_password(form.password.data):
-            login_user(user)
             next_page = request.args.get('next')
             if is_safe_redirect(next_page):
-                return redirect(next_page)
-            return redirect(url_for('admin.dashboard'))
+                response = redirect(next_page)
+            else:
+                response = redirect(url_for('admin.dashboard'))
+            return set_access_cookie(response, issue_access_token(user))
         flash('Sign-in failed.', 'danger')
 
     return render_template('admin/login.html', title='Sign In', form=form)

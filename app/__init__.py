@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from app.config import Config
 from app.models import db, User
+from app.tokens import decode_access_token, token_from_request
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -10,13 +11,16 @@ login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'info'
 csrf = CSRFProtect()
 
-@login_manager.user_loader
-def load_user(user_id):
+@login_manager.request_loader
+def load_user_from_request(request):
+    payload = decode_access_token(token_from_request(request))
+    if not payload:
+        return None
     try:
-        parsed_id = int(user_id)
+        user_id = int(payload.get('sub'))
     except (TypeError, ValueError):
         return None
-    return db.session.get(User, parsed_id)
+    return db.session.get(User, user_id)
 
 def create_app(config_class=Config):
     app = Flask(__name__)

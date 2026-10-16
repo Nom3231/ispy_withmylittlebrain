@@ -32,6 +32,9 @@ class Config:
             f'mysql+pymysql://{DB_USER}:{_db_pass}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
         )
 
+    AUTH_TOKEN_MAX_AGE = int(os.environ.get('AUTH_TOKEN_MAX_AGE', str(60 * 60 * 12)))
+    AUTH_TOKEN_SECURE = os.environ.get('AUTH_TOKEN_SECURE', '').strip().lower() in ('1', 'true', 'yes')
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 280,
