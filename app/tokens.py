@@ -1,3 +1,4 @@
+# Login token helpers. After login we put a JWT in a cookie instead of a Flask session.
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -8,6 +9,7 @@ ALGORITHM = 'HS256'
 
 
 def issue_access_token(user):
+    # Pack the user id into a signed token. It dies after AUTH_TOKEN_MAX_AGE seconds.
     now = datetime.now(timezone.utc)
     lifetime = int(current_app.config['AUTH_TOKEN_MAX_AGE'])
     payload = {
@@ -21,6 +23,7 @@ def issue_access_token(user):
 
 
 def decode_access_token(token):
+    # Returns the payload, or None if the token is missing / old / fake
     if not token:
         return None
     try:
@@ -34,6 +37,7 @@ def decode_access_token(token):
 
 
 def token_from_request(req):
+    # Cookie first for the website. Bearer header is for testing with tools like curl.
     header = req.headers.get('Authorization', '')
     if header.lower().startswith('bearer '):
         return header.split(' ', 1)[1].strip()
@@ -41,6 +45,7 @@ def token_from_request(req):
 
 
 def set_access_cookie(response, token):
+    # httponly so javascript on the page cannot read the token
     response.set_cookie(
         COOKIE_NAME,
         token,
@@ -54,5 +59,6 @@ def set_access_cookie(response, token):
 
 
 def clear_access_cookie(response):
+    # Logout just deletes the cookie
     response.delete_cookie(COOKIE_NAME, path='/')
     return response

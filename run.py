@@ -1,3 +1,5 @@
+# This is the file you run to start the website.
+# Use: .\venv\Scripts\python.exe run.py
 import os
 
 from app import create_app
@@ -5,16 +7,19 @@ from app.models import db, User, ContentUpdate
 
 app = create_app()
 
+# First message that shows on the home page if the updates table is empty
 WELCOME_TITLE = "System Operational: Welcome to I Spy With My Little Brain!"
 WELCOME_CONTENT = (
     "The deduction terminal is live. Ten ranks run from Novice Scout (0-50) "
     "up to Cyber Mastermind (0-100,000). Win rounds to earn points, unlock ranks, "
     "and climb the leaderboard."
 )
+# Old text from an earlier version. We replace it if it is still in the database.
 OLD_WELCOME_SNIPPET = "difficulty cartridge"
 
 
 def init_db():
+    # Make the tables if they are not there yet, then add a welcome post
     with app.app_context():
         db.create_all()
 
@@ -36,6 +41,7 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
+    # Debug is off unless you set FLASK_DEBUG=1 in .env
     debug = os.environ.get('FLASK_DEBUG', '').strip().lower() in ('1', 'true', 'yes')
     print("=" * 60)
     print("I SPY WITH MY LITTLE BRAIN is running!")

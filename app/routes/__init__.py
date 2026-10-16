@@ -1,1 +1,1 @@
-"""HTTP blueprints for the I Spy Brain app."""
+# This folder holds the page routes (home, login, game, admin).

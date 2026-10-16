@@ -1,3 +1,4 @@
+# This file builds the Flask app and wires everything together.
 from flask import Flask
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
@@ -9,8 +10,10 @@ login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'info'
-csrf = CSRFProtect()
+csrf = CSRFProtect()  # stops random sites from posting to our forms
 
+
+# Flask-Login calls this on every request. We read the JWT cookie, not a session.
 @login_manager.request_loader
 def load_user_from_request(request):
     payload = decode_access_token(token_from_request(request))
@@ -22,16 +25,16 @@ def load_user_from_request(request):
         return None
     return db.session.get(User, user_id)
 
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
 
-    # Register blueprints
+    # Split the site into pages: home, login, game, admin
     from app.routes.main import main_bp
     from app.routes.auth import auth_bp
     from app.routes.game import game_bp
@@ -42,7 +45,7 @@ def create_app(config_class=Config):
     app.register_blueprint(game_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
 
-    # Pass config info globally to templates
+    # These values are used in every html template
     @app.context_processor
     def inject_global_vars():
         return {

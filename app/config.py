@@ -1,12 +1,15 @@
+# Settings for the app. Real secrets come from the .env file, not from here.
 import os
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 
+# Load .env from the project folder (the folder above /app)
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 
 def _required(name):
+    # Stop the app if a needed value is missing so we dont start with a blank password
     value = os.environ.get(name, '').strip()
     if not value:
         raise RuntimeError(
@@ -16,13 +19,14 @@ def _required(name):
 
 
 class Config:
-    SECRET_KEY = _required('SECRET_KEY')
+    SECRET_KEY = _required('SECRET_KEY')  # used to sign the login token
 
     DB_USER = os.environ.get('DB_USER', 'root')
     DB_HOST = os.environ.get('DB_HOST', 'localhost')
     DB_PORT = os.environ.get('DB_PORT', '3306')
     DB_NAME = os.environ.get('DB_NAME', 'ispy_brain_db')
 
+    # You can pass a full DATABASE_URL, or we build one from the pieces above
     _database_url = os.environ.get('DATABASE_URL', '').strip()
     if _database_url:
         SQLALCHEMY_DATABASE_URI = _database_url
@@ -32,7 +36,7 @@ class Config:
             f'mysql+pymysql://{DB_USER}:{_db_pass}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
         )
 
-    AUTH_TOKEN_MAX_AGE = int(os.environ.get('AUTH_TOKEN_MAX_AGE', str(60 * 60 * 12)))
+    AUTH_TOKEN_MAX_AGE = int(os.environ.get('AUTH_TOKEN_MAX_AGE', str(60 * 60 * 12)))  # 12 hours
     AUTH_TOKEN_SECURE = os.environ.get('AUTH_TOKEN_SECURE', '').strip().lower() in ('1', 'true', 'yes')
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -41,7 +45,7 @@ class Config:
         'pool_pre_ping': True
     }
 
-    # 10-Level Progressive Difficulty Curve (Ranges scale up to 100,000)
+    # 10 ranks. Higher rank = bigger number range. points_required is how many points to unlock it.
     GAME_LEVELS = {
         1: {'name': 'Novice Scout', 'min': 0, 'base_max': 50, 'max_attempts': 10, 'base_multiplier': 0.3, 'points_required': 0, 'next_threshold': 10000, 'color': '#39ff14'},
         2: {'name': 'Apprentice Mind', 'min': 0, 'base_max': 200, 'max_attempts': 10, 'base_multiplier': 0.6, 'points_required': 10000, 'next_threshold': 40000, 'color': '#00f0ff'},
@@ -55,6 +59,7 @@ class Config:
         10: {'name': 'Cyber Mastermind', 'min': 0, 'base_max': 100000, 'max_attempts': 10, 'base_multiplier': 10.0, 'points_required': 1000000, 'next_threshold': None, 'color': '#ffd700'}
     }
 
+    # Shown on the contact page. Change this if you have real company details.
     ORGANIZATION_INFO = {
         'name': 'I Spy Brain Studios Inc.',
         'email': 'support@ispybrain.com',

@@ -1,3 +1,4 @@
+# Admin pages. These are not linked in the public menu.
 from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import current_user
@@ -19,7 +20,9 @@ def _get_or_404(model, ident):
 def _admin_count():
     return User.query.filter_by(is_admin=True).count()
 
+
 def admin_required(f):
+    # If you are not an admin, just show Not Found so people dont even know this page exists
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin:
@@ -30,11 +33,13 @@ def admin_required(f):
 
 @admin_bp.route('/setup', methods=['GET', 'POST'])
 def setup():
+    # Old public signup for admins. Always 404 now.
     abort(404)
 
 
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    # Hidden login. You have to type /admin/login yourself.
     if current_user.is_authenticated and current_user.is_admin:
         return redirect(url_for('admin.dashboard'))
 
@@ -55,15 +60,16 @@ def login():
 @admin_bp.route('/')
 @admin_required
 def dashboard():
+    # Simple counts for the command centre
     total_users = User.query.count()
     total_games = GameScore.query.count()
     total_wins = GameScore.query.filter_by(won=True).count()
     total_feedback = Feedback.query.count()
-    
+
     users = User.query.order_by(User.created_at.desc()).limit(10).all()
     feedbacks = Feedback.query.order_by(Feedback.submitted_at.desc()).limit(5).all()
     updates = ContentUpdate.query.order_by(ContentUpdate.created_at.desc()).all()
-    
+
     return render_template('admin/dashboard.html',
                            title='Admin Dashboard',
                            total_users=total_users,
@@ -84,6 +90,7 @@ def manage_users():
 @admin_required
 def toggle_admin(user_id):
     user = _get_or_404(User, user_id)
+    # Dont lock yourself out. Always keep at least one admin.
     if user.is_admin and _admin_count() <= 1:
         flash('The only administrator cannot be demoted.', 'warning')
     elif user.id == current_user.id:
@@ -105,8 +112,7 @@ def delete_user(user_id):
         flash('You cannot delete your own account while logged in.', 'danger')
     else:
         username = user.username
-        # Clear children before the user row. Existing databases may not have
-        # ON DELETE rules, so the ORM has to do this itself.
+        # Delete their scores and feedback first. Keep announcements they wrote.
         db.session.execute(db.delete(GameScore).where(GameScore.user_id == user.id))
         db.session.execute(db.delete(Feedback).where(Feedback.user_id == user.id))
         db.session.execute(db.delete(ActiveGame).where(ActiveGame.user_id == user.id))

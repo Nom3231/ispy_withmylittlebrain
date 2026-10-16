@@ -1,3 +1,4 @@
+# Play page, restart, leaderboard and profile.
 import random
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, current_app
 from flask_login import login_required, current_user
@@ -14,11 +15,12 @@ def _levels():
 
 
 def get_active_game(user):
+    # Each player has at most one live round
     return db.session.scalar(db.select(ActiveGame).filter_by(user_id=user.id))
 
 
 def present_game(game):
-    """Template view of a round. The secret number is included only after a loss."""
+    # What the html page is allowed to see. We only send the secret after they lose.
     shown = {
         'level': game.level,
         'level_name': game.level_name,
@@ -41,6 +43,7 @@ def present_game(game):
 
 
 def start_new_game(user, level=1, increment_round=False):
+    # Pick a new secret number and save it in the database
     level = int(level)
     levels_config = _levels()
     if level not in levels_config:
@@ -48,6 +51,7 @@ def start_new_game(user, level=1, increment_round=False):
 
     config = levels_config[level]
     existing = get_active_game(user)
+    # Win streak on the same rank makes the range a bit bigger
     if increment_round and existing is not None and existing.level == level and existing.status == 'won':
         round_num = existing.round_num + 1
     else:
@@ -81,6 +85,7 @@ def start_new_game(user, level=1, increment_round=False):
 
 
 def calculate_score(level_cfg, round_num, attempts_used, max_attempts):
+    # Faster wins and higher ranks give more points
     base_mult = level_cfg['base_multiplier']
     remaining = max_attempts - attempts_used + 1
 
@@ -93,7 +98,7 @@ def calculate_score(level_cfg, round_num, attempts_used, max_attempts):
 
 
 def _drop_legacy_cookie_game():
-    """Older builds stored the secret number in the signed session cookie."""
+    # Old version hid the number in the cookie. Clear it if it is still there.
     if session.get('game') is not None:
         session.pop('game', None)
 
@@ -110,6 +115,7 @@ def play():
         game = start_new_game(current_user, 1)
         progression = current_user.get_progression(levels_config)
 
+    # If they somehow started a locked rank, dump them back to level 1
     if game.status != 'lost' and game.level not in progression['unlocked_levels']:
         flash(
             f"Level {game.level} is locked! You need {levels_config[game.level]['points_required']:,} total points.",
@@ -137,6 +143,7 @@ def play():
         guesses = list(game.guesses or [])
 
         if guess == target:
+            # They found it
             game.status = 'won'
             final_score, eff_mult = calculate_score(
                 lvl_cfg, game.round_num, game.attempts_used, game.max_attempts
@@ -172,6 +179,7 @@ def play():
                 )
 
         elif game.attempts_used >= game.max_attempts:
+            # 10 misses. Next round they start at level 1.
             game.status = 'lost'
             game.score = 0
             guesses.append({
@@ -237,7 +245,7 @@ def restart(level):
     progression = current_user.get_progression(levels_config)
     current_game = get_active_game(current_user)
 
-    # A loss sends the player back to level 1, even if they post a higher level.
+    # After a loss they always go back to level 1
     if current_game is not None and current_game.status == 'lost':
         level = 1
     elif level not in progression['unlocked_levels']:
@@ -254,6 +262,7 @@ def restart(level):
 
 @game_bp.route('/leaderboard')
 def leaderboard():
+    # One high score per player. If they beat their own best, this row updates.
     levels_config = _levels()
     selected_level = request.args.get('level', 'all')
 
@@ -271,7 +280,7 @@ def leaderboard():
         .subquery()
     )
 
-    # One row per player: their current personal best. If two rounds tied, keep the latest.
+    # If two wins have the same points, keep the newer one
     best_row_id = (
         db.session.query(
             GameScore.user_id.label('user_id'),
@@ -309,6 +318,7 @@ def leaderboard():
 @game_bp.route('/profile')
 @login_required
 def profile():
+    # Full history stays here. Leaderboard only shows the best score.
     levels_config = _levels()
     progression = current_user.get_progression(levels_config)
     stats = current_user.get_stats()
