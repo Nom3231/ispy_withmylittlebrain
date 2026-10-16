@@ -1,6 +1,8 @@
 import random
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, current_app
 from flask_login import login_required, current_user
+from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 from app.models import db, GameScore, ActiveGame
 from app.forms import GuessForm
 
@@ -255,11 +257,45 @@ def leaderboard():
     levels_config = _levels()
     selected_level = request.args.get('level', 'all')
 
-    query = GameScore.query.filter_by(won=True)
+    won_filters = [GameScore.won.is_(True)]
     if selected_level != 'all' and selected_level.isdigit():
-        query = query.filter_by(difficulty=selected_level)
+        won_filters.append(GameScore.difficulty == selected_level)
 
-    top_scores = query.order_by(GameScore.score.desc()).limit(20).all()
+    best_by_user = (
+        db.session.query(
+            GameScore.user_id.label('user_id'),
+            func.max(GameScore.score).label('best_score'),
+        )
+        .filter(*won_filters)
+        .group_by(GameScore.user_id)
+        .subquery()
+    )
+
+    # One row per player: their current personal best. If two rounds tied, keep the latest.
+    best_row_id = (
+        db.session.query(
+            GameScore.user_id.label('user_id'),
+            func.max(GameScore.id).label('score_id'),
+        )
+        .join(
+            best_by_user,
+            db.and_(
+                GameScore.user_id == best_by_user.c.user_id,
+                GameScore.score == best_by_user.c.best_score,
+            ),
+        )
+        .filter(*won_filters)
+        .group_by(GameScore.user_id)
+        .subquery()
+    )
+
+    top_scores = (
+        GameScore.query.options(joinedload(GameScore.player))
+        .join(best_row_id, GameScore.id == best_row_id.c.score_id)
+        .order_by(GameScore.score.desc(), GameScore.played_at.asc())
+        .limit(20)
+        .all()
+    )
 
     return render_template(
         'game/leaderboard.html',
